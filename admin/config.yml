@@ -1,0 +1,51 @@
+backend:
+  name: git-gateway
+  branch: main
+
+media_folder: "images/uploads"
+public_folder: "/images/uploads"
+
+collections:
+  - name: "works"
+    label: "作品列表"
+    files:
+      - name: "works"
+        label: "全部作品"
+        file: "content/works.json"
+        fields:
+          - label: "作品清單"
+            name: "items"
+            widget: "list"
+            summary: "{{title}} — {{cat}}"
+            fields:
+              - { label: "標題", name: "title", widget: "string" }
+              - label: "分類"
+                name: "cat"
+                widget: "select"
+                options: ["品牌廣告", "產品影片", "生活vlog", "MV製作"]
+              - label: "YouTube 影片 ID"
+                name: "yt"
+                widget: "string"
+                hint: "只填 ID，不要貼完整網址。例如網址是 https://youtu.be/dQw4w9WgXcQ，就只填 dQw4w9WgXcQ"
+              - { label: "描述", name: "desc", widget: "string", required: false }
+              - { label: "片長", name: "dur", widget: "string", required: false, hint: "例如 01:15" }
+              - { label: "比例標籤", name: "ratio", widget: "string", default: "9:16" }
+
+      - name: "bts"
+        label: "幕後花絮"
+        file: "content/bts.json"
+        fields:
+          - label: "花絮清單"
+            name: "items"
+            widget: "list"
+            summary: "{{title}} — {{tag}}"
+            fields:
+              - { label: "標題", name: "title", widget: "string" }
+              - label: "標籤"
+                name: "tag"
+                widget: "select"
+                options: ["SET", "GEAR", "NG", "CREW"]
+              - label: "YouTube 影片 ID"
+                name: "yt"
+                widget: "string"
+                hint: "只填 ID，不要貼完整網址。例如網址是 https://youtu.be/dQw4w9WgXcQ，就只填 dQw4w9WgXcQ"

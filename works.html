@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>全部作品 — Gyokusan.REEL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<canvas id="ambient-canvas" data-color="111,191,176"></canvas>
+
+<nav class="site-nav">
+  <div class="site-nav__brand"><span class="site-nav__dot"></span>Gyokusan.REEL</div>
+  <div class="site-nav__links">
+    <a href="index.html" class="is-active">WORK</a>
+    <a href="bts.html">BTS</a>
+    <a href="about.html">ABOUT</a>
+    <a href="contact.html">CONTACT</a>
+  </div>
+  <div class="site-nav__loc">KAOHSIUNG, TW</div>
+</nav>
+
+<div style="padding:28px 8vw 0;">
+  <a href="index.html#work" class="mono" style="font-size:12px;color:var(--text-muted);">← 返回精選作品</a>
+</div>
+
+<section class="hero" style="padding:4vw 8vw 4vw;">
+  <div class="hero__tags"><span>ARCHIVE</span><span>ALL FORMATS</span><span>REC ● ONLINE</span></div>
+  <h1 style="font-size:clamp(38px,6vw,68px);line-height:0.95;">全部<span style="color:var(--accent-red);">作品</span></h1>
+  <p style="max-width:480px;font-size:14px;margin-top:18px;">依分類篩選,瀏覽所有已上線的作品。</p>
+</section>
+
+<div class="filter-row">
+  <button type="button" class="filter-chip is-active" data-filter="全部">全部</button>
+  <button type="button" class="filter-chip" data-filter="品牌廣告">品牌廣告</button>
+  <button type="button" class="filter-chip" data-filter="產品影片">產品影片</button>
+  <button type="button" class="filter-chip" data-filter="生活vlog">生活vlog</button>
+  <button type="button" class="filter-chip" data-filter="MV製作">MV製作</button>
+</div>
+
+<div class="video-grid" id="works-grid">
+  <!-- 卡片由 js/main.js 讀取 content/works.json 動態產生，請勿在此手動新增 -->
+</div>
+
+<footer class="site-footer">
+  <span>© 2026 Gyokusan.REEL</span>
+  <a href="contact.html">合作洽談 →</a>
+  <span>KAOHSIUNG, TW</span>
+</footer>
+
+<div id="video-modal" class="video-modal hidden">
+  <div class="video-modal__box"></div>
+</div>
+
+<script src="js/main.js"></script>
+</body>
+</html>

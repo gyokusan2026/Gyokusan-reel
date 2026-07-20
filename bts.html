@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>幕後花絮 — Gyokusan.REEL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<canvas id="ambient-canvas" data-color="111,191,176"></canvas>
+
+<nav class="site-nav">
+  <div class="site-nav__brand"><span class="site-nav__dot"></span>Gyokusan.REEL</div>
+  <div class="site-nav__links">
+    <a href="index.html">WORK</a>
+    <a href="bts.html" class="is-active">BTS</a>
+    <a href="about.html">ABOUT</a>
+    <a href="contact.html">CONTACT</a>
+  </div>
+  <div class="site-nav__loc">KAOHSIUNG, TW</div>
+</nav>
+
+<section class="hero">
+  <div class="hero__tags"><span>ARCHIVE</span><span>OFF CAMERA</span><span>REC ● ONLINE</span></div>
+  <h1 style="font-size:clamp(44px,8vw,96px);">幕後<br><span style="color:var(--accent-red);">花絮</span>全記錄</h1>
+  <p style="max-width:none;white-space:nowrap;">拍攝現場的真實片刻——器材、片場、NG 片段,那些正式作品裡看不到的過程。</p>
+</section>
+
+<div class="bts-roll-head">
+  <span class="section-head__tag">01 — CONTACT SHEET</span>
+  <div class="section-head__rule"></div>
+  <h2 style="font-family:'Barlow Condensed','Noto Sans TC',sans-serif;font-weight:800;font-size:clamp(24px,3vw,32px);white-space:nowrap;margin:0;">幕後花絮</h2>
+</div>
+
+<div style="display:flex;align-items:baseline;gap:12px;padding:0 8vw;margin-bottom:18px;flex-wrap:wrap;">
+  <span class="mono" style="font-size:12px;color:var(--accent-green);">ALL FRAMES</span>
+  <span class="mono bts-roll-head__count" id="bts-count">10 FRAMES</span>
+</div>
+
+<div class="video-grid--square" id="bts-grid">
+  <!-- 卡片由 js/main.js 讀取 content/bts.json 動態產生，請勿在此手動新增 -->
+</div>
+
+<div class="cta-block" style="padding:90px 8vw 110px;">
+  <div class="cta-block__eyebrow">— END OF ROLL —</div>
+  <h2 style="font-size:clamp(32px,5vw,50px);">想看正式完成的作品?</h2>
+  <a href="index.html#work" class="btn-ghost">← BACK TO WORK</a>
+</div>
+
+<footer class="site-footer">
+  <span>© 2026 Gyokusan.REEL</span>
+  <a href="contact.html">合作洽談 →</a>
+  <span>KAOHSIUNG, TW</span>
+</footer>
+
+<div id="video-modal" class="video-modal hidden">
+  <div class="video-modal__box"></div>
+</div>
+
+<script src="js/main.js"></script>
+</body>
+</html>

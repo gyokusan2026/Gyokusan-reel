@@ -1,0 +1,12 @@
+{
+  "items": [
+    { "title": "品牌形象影片", "cat": "品牌廣告", "yt": "PASTE_YOUTUBE_ID_HERE", "desc": "敘事剪輯 · 探針鏡頭", "dur": "01:15", "ratio": "9:16" },
+    { "title": "品牌零食廣告", "cat": "品牌廣告", "yt": "PASTE_YOUTUBE_ID_HERE", "desc": "產品特寫 · 色彩分級", "dur": "00:28", "ratio": "9:16" },
+    { "title": "產品特寫剪輯", "cat": "產品影片", "yt": "PASTE_YOUTUBE_ID_HERE", "desc": "質感光影 · 慢動作", "dur": "00:35", "ratio": "9:16" },
+    { "title": "活動花絮側寫", "cat": "生活vlog", "yt": "PASTE_YOUTUBE_ID_HERE", "desc": "快剪節奏", "dur": "00:45", "ratio": "9:16" },
+    { "title": "MV 剪輯作品", "cat": "MV製作", "yt": "PASTE_YOUTUBE_ID_HERE", "desc": "節奏卡點 · 調光", "dur": "03:05", "ratio": "9:16" },
+    { "title": "品牌零食廣告 B", "cat": "品牌廣告", "yt": "PASTE_YOUTUBE_ID_HERE", "desc": "口味系列", "dur": "00:32", "ratio": "9:16" },
+    { "title": "日常剪輯側寫", "cat": "生活vlog", "yt": "PASTE_YOUTUBE_ID_HERE", "desc": "旅拍", "dur": "02:10", "ratio": "9:16" },
+    { "title": "產品開箱剪輯", "cat": "產品影片", "yt": "PASTE_YOUTUBE_ID_HERE", "desc": "情境示範", "dur": "00:40", "ratio": "9:16" }
+  ]
+}
