@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', function () {
 function loadDynamicGrids() {
   var worksGrid = document.getElementById('works-grid');
   var btsGrid = document.getElementById('bts-grid');
+  var homeRows = document.getElementById('home-work-rows');
   var tasks = [];
 
   if (worksGrid) {
@@ -29,6 +30,21 @@ function loadDynamicGrids() {
         .catch(function (err) {
           console.error('作品資料載入失敗', err);
           worksGrid.innerHTML = '<p class="mono" style="color:var(--text-muted);">作品資料載入失敗，請稍後再試。</p>';
+        })
+    );
+  }
+
+  if (homeRows) {
+    tasks.push(
+      fetch('content/works.json')
+        .then(function (res) {
+          if (!res.ok) throw new Error('works.json 讀取失敗：' + res.status);
+          return res.json();
+        })
+        .then(function (data) { renderHomeRows(homeRows, data.items || []); })
+        .catch(function (err) {
+          console.error('作品資料載入失敗', err);
+          homeRows.innerHTML = '<p class="mono" style="color:var(--text-muted);padding:0 8vw;">作品資料載入失敗，請稍後再試。</p>';
         })
     );
   }
@@ -81,6 +97,53 @@ function renderWorksCards(grid, items) {
           '<div class="video-card__title">' + title + '</div>' +
           '<div class="video-card__desc">' + desc + '</div>' +
         '</div>' +
+      '</div>'
+    );
+  }).join('');
+}
+
+var HOME_CATEGORY_ORDER = ['品牌廣告', '產品影片', '生活vlog', 'MV製作'];
+
+function renderHomeRows(container, items) {
+  var groups = {};
+  items.forEach(function (item) {
+    var cat = item.cat || '未分類';
+    if (!groups[cat]) groups[cat] = [];
+    groups[cat].push(item);
+  });
+
+  var cats = HOME_CATEGORY_ORDER.filter(function (c) { return groups[c] && groups[c].length; });
+  Object.keys(groups).forEach(function (c) {
+    if (cats.indexOf(c) === -1) cats.push(c);
+  });
+
+  container.innerHTML = cats.map(function (cat) {
+    var cards = groups[cat].map(function (item) {
+      var title = escapeHtml(item.title);
+      var yt = escapeHtml(item.yt || 'PASTE_YOUTUBE_ID_HERE');
+      var desc = escapeHtml(item.desc);
+      var ratio = escapeHtml(item.ratio || '9:16');
+      var durTag = item.dur ? '<span class="video-card__dur-tag">' + escapeHtml(item.dur) + '</span>' : '';
+
+      return (
+        '<div class="video-card" data-cat="' + escapeHtml(cat) + '" data-yt="' + yt + '" data-title="' + title + '">' +
+          '<div class="video-card__media">' +
+            '<span class="video-card__ratio-tag">' + ratio + '</span>' +
+            '<span class="video-card__play-icon"></span>' +
+            durTag +
+          '</div>' +
+          '<div class="video-card__info">' +
+            '<div class="video-card__title">' + title + '</div>' +
+            '<div class="video-card__desc">' + desc + '</div>' +
+          '</div>' +
+        '</div>'
+      );
+    }).join('');
+
+    return (
+      '<div class="work-row">' +
+        '<div class="work-row__label"><span class="work-row__dot"></span>' + escapeHtml(cat) + '</div>' +
+        '<div class="work-row__scroll">' + cards + '</div>' +
       '</div>'
     );
   }).join('');
