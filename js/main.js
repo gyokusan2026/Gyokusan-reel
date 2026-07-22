@@ -70,6 +70,16 @@ function loadDynamicGrids() {
   });
 }
 
+function extractYouTubeId(raw) {
+  if (!raw) return raw;
+  var str = String(raw).trim();
+  var vMatch = str.match(/[?&]v=([A-Za-z0-9_-]{6,20})/);
+  if (vMatch) return vMatch[1];
+  var pathMatch = str.match(/(?:youtu\.be\/|\/embed\/|\/shorts\/)([A-Za-z0-9_-]{6,20})/);
+  if (pathMatch) return pathMatch[1];
+  return str.split(/[?&#\s]/)[0] || str;
+}
+
 function escapeHtml(str) {
   return String(str == null ? '' : str).replace(/[&<>"']/g, function (c) {
     return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
@@ -80,7 +90,7 @@ function renderWorksCards(grid, items) {
   grid.innerHTML = items.map(function (item) {
     var title = escapeHtml(item.title);
     var cat = escapeHtml(item.cat);
-    var yt = escapeHtml(item.yt || 'PASTE_YOUTUBE_ID_HERE');
+    var yt = escapeHtml(extractYouTubeId(item.yt) || 'PASTE_YOUTUBE_ID_HERE');
     var desc = escapeHtml(item.desc);
     var ratio = escapeHtml(item.ratio || '9:16');
     var durTag = item.dur ? '<span class="video-card__dur-tag">' + escapeHtml(item.dur) + '</span>' : '';
@@ -120,7 +130,7 @@ function renderHomeRows(container, items) {
   container.innerHTML = cats.map(function (cat) {
     var cards = groups[cat].map(function (item) {
       var title = escapeHtml(item.title);
-      var yt = escapeHtml(item.yt || 'PASTE_YOUTUBE_ID_HERE');
+      var yt = escapeHtml(extractYouTubeId(item.yt) || 'PASTE_YOUTUBE_ID_HERE');
       var desc = escapeHtml(item.desc);
       var ratio = escapeHtml(item.ratio || '9:16');
       var durTag = item.dur ? '<span class="video-card__dur-tag">' + escapeHtml(item.dur) + '</span>' : '';
@@ -153,7 +163,7 @@ function renderBtsCards(grid, items) {
   grid.innerHTML = items.map(function (item, idx) {
     var num = String(idx + 1).length < 2 ? '0' + (idx + 1) : String(idx + 1);
     var title = escapeHtml(item.title || ('幕後花絮 ' + num));
-    var yt = escapeHtml(item.yt || 'PASTE_YOUTUBE_ID_HERE');
+    var yt = escapeHtml(extractYouTubeId(item.yt) || 'PASTE_YOUTUBE_ID_HERE');
     var tag = escapeHtml(item.tag || '');
 
     return (
