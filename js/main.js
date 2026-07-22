@@ -284,7 +284,7 @@ function playInline(card, media, ytId) {
   media.classList.remove('has-thumb');
 
   var iframe = document.createElement('iframe');
-  iframe.src = 'https://www.youtube-nocookie.com/embed/' + ytId + '?autoplay=1&rel=0';
+  iframe.src = 'https://www.youtube-nocookie.com/embed/' + ytId + '?autoplay=1&mute=1&rel=0';
   iframe.title = 'video';
   iframe.allow = 'autoplay; encrypted-media; picture-in-picture';
   iframe.allowFullscreen = true;
@@ -324,7 +324,7 @@ function openVideoModal(ytId, title) {
   if (!videoModalEl) return;
   var box = videoModalEl.querySelector('.video-modal__box');
   box.innerHTML = '<button type="button" class="video-modal__close" aria-label="關閉">&times;</button>' +
-    '<iframe src="https://www.youtube-nocookie.com/embed/' + ytId + '?autoplay=1&rel=0" title="' +
+    '<iframe src="https://www.youtube-nocookie.com/embed/' + ytId + '?autoplay=1&mute=1&rel=0" title="' +
     (title || 'video') + '" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
   box.querySelector('.video-modal__close').addEventListener('click', closeVideoModal);
   videoModalEl.classList.remove('hidden');
