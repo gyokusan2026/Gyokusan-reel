@@ -18,13 +18,6 @@
     },
     {
       "ratio": "9:16",
-      "title": "海飯水產",
-      "cat": "產品影片",
-      "yt": "IdSZfzOoKYo?feature=share",
-      "dur": "00:32"
-    },
-    {
-      "ratio": "9:16",
       "yt": "No-u4KVxtUc?feature=share",
       "cat": "品牌廣告",
       "title": "頭皮養護形象片",
@@ -36,13 +29,6 @@
       "cat": "產品影片",
       "yt": "azpw234W-_Y?feature=share",
       "dur": "00:53"
-    },
-    {
-      "ratio": "9:16",
-      "title": "海產形象廣告",
-      "cat": "品牌廣告",
-      "yt": "WHEs31UB7BQ?feature=share",
-      "dur": "00:34"
     },
     {
       "ratio": "9:16",
@@ -74,6 +60,20 @@
       "yt": "EJSmuKjFaug?feature=share",
       "cat": "生活vlog",
       "dur": "00:36"
+    },
+    {
+      "ratio": "9:16",
+      "title": "海飯水產形象片",
+      "cat": "品牌廣告",
+      "yt": "WHEs31UB7BQ?feature=share",
+      "dur": "00:34"
+    },
+    {
+      "ratio": "9:16",
+      "title": "海飯水產產品行銷",
+      "cat": "產品影片",
+      "yt": "IdSZfzOoKYo?feature=share",
+      "dur": "00:32"
     }
   ]
 }
