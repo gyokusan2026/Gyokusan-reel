@@ -6,9 +6,182 @@ document.addEventListener('DOMContentLoaded', function () {
   initAmbientCanvas();
   initVideoModal();
   initContactForm();
-  initVideoCards();
-  initFilterChips();
+  loadDynamicGrids();
 });
+
+/* ---------------------------------------------------------------------
+   0. 讀取 content/works.json、content/bts.json，動態產生作品卡片
+      (CMS 在 Netlify 後台編輯的就是這兩個 JSON 檔)
+   --------------------------------------------------------------------- */
+function loadDynamicGrids() {
+  var worksGrid = document.getElementById('works-grid');
+  var btsGrid = document.getElementById('bts-grid');
+  var homeRows = document.getElementById('home-work-rows');
+  var tasks = [];
+
+  if (worksGrid) {
+    tasks.push(
+      fetch('content/works.json')
+        .then(function (res) {
+          if (!res.ok) throw new Error('works.json 讀取失敗：' + res.status);
+          return res.json();
+        })
+        .then(function (data) { renderWorksCards(worksGrid, data.items || []); })
+        .catch(function (err) {
+          console.error('作品資料載入失敗', err);
+          worksGrid.innerHTML = '<p class="mono" style="color:var(--text-muted);">作品資料載入失敗，請稍後再試。</p>';
+        })
+    );
+  }
+
+  if (homeRows) {
+    tasks.push(
+      fetch('content/works.json')
+        .then(function (res) {
+          if (!res.ok) throw new Error('works.json 讀取失敗：' + res.status);
+          return res.json();
+        })
+        .then(function (data) { renderHomeRows(homeRows, data.items || []); })
+        .catch(function (err) {
+          console.error('作品資料載入失敗', err);
+          homeRows.innerHTML = '<p class="mono" style="color:var(--text-muted);padding:0 8vw;">作品資料載入失敗，請稍後再試。</p>';
+        })
+    );
+  }
+
+  if (btsGrid) {
+    tasks.push(
+      fetch('content/bts.json')
+        .then(function (res) {
+          if (!res.ok) throw new Error('bts.json 讀取失敗：' + res.status);
+          return res.json();
+        })
+        .then(function (data) { renderBtsCards(btsGrid, data.items || []); })
+        .catch(function (err) {
+          console.error('花絮資料載入失敗', err);
+          btsGrid.innerHTML = '<p class="mono" style="color:var(--text-muted);">花絮資料載入失敗，請稍後再試。</p>';
+        })
+    );
+  }
+
+  Promise.all(tasks).then(function () {
+    initVideoCards();
+    initFilterChips();
+  });
+}
+
+function extractYouTubeId(raw) {
+  if (!raw) return raw;
+  var str = String(raw).trim();
+  var vMatch = str.match(/[?&]v=([A-Za-z0-9_-]{6,20})/);
+  if (vMatch) return vMatch[1];
+  var pathMatch = str.match(/(?:youtu\.be\/|\/embed\/|\/shorts\/)([A-Za-z0-9_-]{6,20})/);
+  if (pathMatch) return pathMatch[1];
+  return str.split(/[?&#\s]/)[0] || str;
+}
+
+function escapeHtml(str) {
+  return String(str == null ? '' : str).replace(/[&<>"']/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  });
+}
+
+function renderWorksCards(grid, items) {
+  grid.innerHTML = items.map(function (item) {
+    var title = escapeHtml(item.title);
+    var cat = escapeHtml(item.cat);
+    var yt = escapeHtml(extractYouTubeId(item.yt) || 'PASTE_YOUTUBE_ID_HERE');
+    var desc = escapeHtml(item.desc);
+    var ratio = escapeHtml(item.ratio || '9:16');
+    var durTag = item.dur ? '<span class="video-card__dur-tag">' + escapeHtml(item.dur) + '</span>' : '';
+
+    return (
+      '<div class="video-card" data-cat="' + cat + '" data-yt="' + yt + '" data-title="' + title + '">' +
+        '<div class="video-card__media">' +
+          '<span class="video-card__ratio-tag">' + ratio + '</span>' +
+          '<span class="video-card__cat-tag">' + cat + '</span>' +
+          '<span class="video-card__play-icon"></span>' +
+          durTag +
+        '</div>' +
+        '<div class="video-card__info">' +
+          '<div class="video-card__title">' + title + '</div>' +
+          '<div class="video-card__desc">' + desc + '</div>' +
+        '</div>' +
+      '</div>'
+    );
+  }).join('');
+}
+
+var HOME_CATEGORY_ORDER = ['品牌廣告', '產品影片', '生活vlog', 'MV製作'];
+
+function renderHomeRows(container, items) {
+  var groups = {};
+  items.forEach(function (item) {
+    var cat = item.cat || '未分類';
+    if (!groups[cat]) groups[cat] = [];
+    groups[cat].push(item);
+  });
+
+  var cats = HOME_CATEGORY_ORDER.filter(function (c) { return groups[c] && groups[c].length; });
+  Object.keys(groups).forEach(function (c) {
+    if (cats.indexOf(c) === -1) cats.push(c);
+  });
+
+  container.innerHTML = cats.map(function (cat) {
+    var cards = groups[cat].map(function (item) {
+      var title = escapeHtml(item.title);
+      var yt = escapeHtml(extractYouTubeId(item.yt) || 'PASTE_YOUTUBE_ID_HERE');
+      var desc = escapeHtml(item.desc);
+      var ratio = escapeHtml(item.ratio || '9:16');
+      var durTag = item.dur ? '<span class="video-card__dur-tag">' + escapeHtml(item.dur) + '</span>' : '';
+
+      return (
+        '<div class="video-card" data-cat="' + escapeHtml(cat) + '" data-yt="' + yt + '" data-title="' + title + '">' +
+          '<div class="video-card__media">' +
+            '<span class="video-card__ratio-tag">' + ratio + '</span>' +
+            '<span class="video-card__play-icon"></span>' +
+            durTag +
+          '</div>' +
+          '<div class="video-card__info">' +
+            '<div class="video-card__title">' + title + '</div>' +
+            '<div class="video-card__desc">' + desc + '</div>' +
+          '</div>' +
+        '</div>'
+      );
+    }).join('');
+
+    return (
+      '<div class="work-row">' +
+        '<div class="work-row__label"><span class="work-row__dot"></span>' + escapeHtml(cat) + '</div>' +
+        '<div class="work-row__scroll">' + cards + '</div>' +
+      '</div>'
+    );
+  }).join('');
+}
+
+function renderBtsCards(grid, items) {
+  grid.innerHTML = items.map(function (item, idx) {
+    var num = String(idx + 1).length < 2 ? '0' + (idx + 1) : String(idx + 1);
+    var title = escapeHtml(item.title || ('幕後花絮 ' + num));
+    var yt = escapeHtml(extractYouTubeId(item.yt) || 'PASTE_YOUTUBE_ID_HERE');
+    var tag = escapeHtml(item.tag || '');
+
+    return (
+      '<div class="video-card video-card--square" data-yt="' + yt + '" data-title="' + title + '">' +
+        '<div class="video-card__perf"></div>' +
+        '<div class="video-card__media">' +
+          '<span class="video-card__num-tag">' + num + '</span>' +
+          '<span class="video-card__play-icon"></span>' +
+          '<span class="video-card__dur-tag">' + tag + '</span>' +
+        '</div>' +
+        '<div class="video-card__perf"></div>' +
+      '</div>'
+    );
+  }).join('');
+
+  var countEl = document.getElementById('bts-count');
+  if (countEl) countEl.textContent = items.length + ' FRAMES';
+}
 
 /* ---------------------------------------------------------------------
    1. Ambient background canvas — 滑鼠/觸控漣漪 + 呼吸網格

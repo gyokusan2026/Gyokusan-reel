@@ -1,6 +1,9 @@
 backend:
-  name: git-gateway
+  name: github
+  repo: gyokusan2026/Gyokusan-reel
   branch: main
+  base_url: https://REPLACE_WITH_VERCEL_DOMAIN
+  auth_endpoint: api/auth
 
 media_folder: "images/uploads"
 public_folder: "/images/uploads"
