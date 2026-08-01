@@ -1,75 +1,17 @@
 /* ==========================================================================
-   Gyokusan.REEL — 共用互動邏輯
+   Gyokusan.REEL — 共用互動邏輯（米白紙卡版型）
    ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', function () {
-  initAmbientCanvas();
-  initVideoModal();
+  initBgVideo();
+  initWorkGrid();
+  initBtsGrid();
   initContactForm();
-  loadDynamicGrids();
 });
 
 /* ---------------------------------------------------------------------
-   0. 讀取 content/works.json、content/bts.json，動態產生作品卡片
-      (CMS 在 Netlify 後台編輯的就是這兩個 JSON 檔)
+   0. 共用小工具
    --------------------------------------------------------------------- */
-function loadDynamicGrids() {
-  var worksGrid = document.getElementById('works-grid');
-  var btsGrid = document.getElementById('bts-grid');
-  var homeRows = document.getElementById('home-work-rows');
-  var tasks = [];
-
-  if (worksGrid) {
-    tasks.push(
-      fetch('content/works.json')
-        .then(function (res) {
-          if (!res.ok) throw new Error('works.json 讀取失敗：' + res.status);
-          return res.json();
-        })
-        .then(function (data) { renderWorksCards(worksGrid, data.items || []); })
-        .catch(function (err) {
-          console.error('作品資料載入失敗', err);
-          worksGrid.innerHTML = '<p class="mono" style="color:var(--text-muted);">作品資料載入失敗，請稍後再試。</p>';
-        })
-    );
-  }
-
-  if (homeRows) {
-    tasks.push(
-      fetch('content/works.json')
-        .then(function (res) {
-          if (!res.ok) throw new Error('works.json 讀取失敗：' + res.status);
-          return res.json();
-        })
-        .then(function (data) { renderHomeRows(homeRows, data.items || []); })
-        .catch(function (err) {
-          console.error('作品資料載入失敗', err);
-          homeRows.innerHTML = '<p class="mono" style="color:var(--text-muted);padding:0 8vw;">作品資料載入失敗，請稍後再試。</p>';
-        })
-    );
-  }
-
-  if (btsGrid) {
-    tasks.push(
-      fetch('content/bts.json')
-        .then(function (res) {
-          if (!res.ok) throw new Error('bts.json 讀取失敗：' + res.status);
-          return res.json();
-        })
-        .then(function (data) { renderBtsCards(btsGrid, data.items || []); })
-        .catch(function (err) {
-          console.error('花絮資料載入失敗', err);
-          btsGrid.innerHTML = '<p class="mono" style="color:var(--text-muted);">花絮資料載入失敗，請稍後再試。</p>';
-        })
-    );
-  }
-
-  Promise.all(tasks).then(function () {
-    initVideoCards();
-    initFilterChips();
-  });
-}
-
 function extractYouTubeId(raw) {
   if (!raw) return raw;
   var str = String(raw).trim();
@@ -86,291 +28,209 @@ function escapeHtml(str) {
   });
 }
 
-function renderWorksCards(grid, items) {
-  grid.innerHTML = items.map(function (item) {
-    var title = escapeHtml(item.title);
-    var cat = escapeHtml(item.cat);
-    var yt = escapeHtml(extractYouTubeId(item.yt) || 'PASTE_YOUTUBE_ID_HERE');
-    var desc = escapeHtml(item.desc);
-    var ratio = escapeHtml(item.ratio || '9:16');
-    var durTag = item.dur ? '<span class="video-card__dur-tag">' + escapeHtml(item.dur) + '</span>' : '';
-
-    return (
-      '<div class="video-card" data-cat="' + cat + '" data-yt="' + yt + '" data-title="' + title + '">' +
-        '<div class="video-card__media">' +
-          '<span class="video-card__ratio-tag">' + ratio + '</span>' +
-          '<span class="video-card__cat-tag">' + cat + '</span>' +
-          '<span class="video-card__play-icon"></span>' +
-          durTag +
-        '</div>' +
-        '<div class="video-card__info">' +
-          '<div class="video-card__title">' + title + '</div>' +
-          '<div class="video-card__desc">' + desc + '</div>' +
-        '</div>' +
-      '</div>'
-    );
-  }).join('');
+function youtubeThumb(ytId) {
+  return 'https://i.ytimg.com/vi/' + ytId + '/hqdefault.jpg';
 }
 
-var HOME_CATEGORY_ORDER = ['品牌廣告', '產品影片', '生活vlog', 'MV製作'];
-
-function renderHomeRows(container, items) {
-  var groups = {};
-  items.forEach(function (item) {
-    var cat = item.cat || '未分類';
-    if (!groups[cat]) groups[cat] = [];
-    groups[cat].push(item);
-  });
-
-  var cats = HOME_CATEGORY_ORDER.filter(function (c) { return groups[c] && groups[c].length; });
-  Object.keys(groups).forEach(function (c) {
-    if (cats.indexOf(c) === -1) cats.push(c);
-  });
-
-  container.innerHTML = cats.map(function (cat) {
-    var cards = groups[cat].map(function (item) {
-      var title = escapeHtml(item.title);
-      var yt = escapeHtml(extractYouTubeId(item.yt) || 'PASTE_YOUTUBE_ID_HERE');
-      var desc = escapeHtml(item.desc);
-      var ratio = escapeHtml(item.ratio || '9:16');
-      var durTag = item.dur ? '<span class="video-card__dur-tag">' + escapeHtml(item.dur) + '</span>' : '';
-
-      return (
-        '<div class="video-card" data-cat="' + escapeHtml(cat) + '" data-yt="' + yt + '" data-title="' + title + '">' +
-          '<div class="video-card__media">' +
-            '<span class="video-card__ratio-tag">' + ratio + '</span>' +
-            '<span class="video-card__play-icon"></span>' +
-            durTag +
-          '</div>' +
-          '<div class="video-card__info">' +
-            '<div class="video-card__title">' + title + '</div>' +
-            '<div class="video-card__desc">' + desc + '</div>' +
-          '</div>' +
-        '</div>'
-      );
-    }).join('');
-
-    return (
-      '<div class="work-row">' +
-        '<div class="work-row__label"><span class="work-row__dot"></span>' + escapeHtml(cat) + '</div>' +
-        '<div class="work-row__scroll">' + cards + '</div>' +
-      '</div>'
-    );
-  }).join('');
-}
-
-function renderBtsCards(grid, items) {
-  grid.innerHTML = items.map(function (item, idx) {
-    var num = String(idx + 1).length < 2 ? '0' + (idx + 1) : String(idx + 1);
-    var title = escapeHtml(item.title || ('幕後花絮 ' + num));
-    var yt = escapeHtml(extractYouTubeId(item.yt) || 'PASTE_YOUTUBE_ID_HERE');
-    var tag = escapeHtml(item.tag || '');
-
-    return (
-      '<div class="video-card video-card--square" data-yt="' + yt + '" data-title="' + title + '">' +
-        '<div class="video-card__perf"></div>' +
-        '<div class="video-card__media">' +
-          '<span class="video-card__num-tag">' + num + '</span>' +
-          '<span class="video-card__play-icon"></span>' +
-          '<span class="video-card__dur-tag">' + tag + '</span>' +
-        '</div>' +
-        '<div class="video-card__perf"></div>' +
-      '</div>'
-    );
-  }).join('');
-
-  var countEl = document.getElementById('bts-count');
-  if (countEl) countEl.textContent = items.length + ' FRAMES';
+function youtubeEmbed(ytId) {
+  return '<iframe src="https://www.youtube-nocookie.com/embed/' + ytId +
+    '?autoplay=1&mute=1&rel=0" title="video" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
 }
 
 /* ---------------------------------------------------------------------
-   1. Ambient background canvas — 滑鼠/觸控漣漪 + 呼吸網格
+   1. 背景影片 / 首頁 hero 影片 — 強制播放
    --------------------------------------------------------------------- */
-function initAmbientCanvas() {
-  var canvas = document.getElementById('ambient-canvas');
-  if (!canvas) return;
-  var ctx = canvas.getContext('2d');
-  var w, h, dpr;
-  var color = canvas.dataset.color || '111,191,176';
-
-  function resize() {
-    dpr = window.devicePixelRatio || 1;
-    w = window.innerWidth;
-    h = window.innerHeight;
-    canvas.width = w * dpr;
-    canvas.height = h * dpr;
-    canvas.style.width = w + 'px';
-    canvas.style.height = h + 'px';
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  }
-  window.addEventListener('resize', resize);
-  resize();
-
-  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var gap = 26;
-  var ripples = [];
-  var lastPoint = null;
-
-  function addRipple(x, y) {
-    ripples.push({ x: x, y: y, r: 0, alpha: 0.55 });
-    if (ripples.length > 14) ripples.shift();
-  }
-  function handleMove(x, y) {
-    if (!lastPoint || Math.hypot(x - lastPoint.x, y - lastPoint.y) > 34) {
-      addRipple(x, y);
-      lastPoint = { x: x, y: y };
-    }
-  }
-  window.addEventListener('mousemove', function (e) { handleMove(e.clientX, e.clientY); }, { passive: true });
-  window.addEventListener('touchmove', function (e) {
-    if (e.touches && e.touches[0]) handleMove(e.touches[0].clientX, e.touches[0].clientY);
-  }, { passive: true });
-
-  var t = 0, ringWidth = 60;
-  function draw() {
-    t += 0.01;
-    ctx.clearRect(0, 0, w, h);
-    ripples.forEach(function (r) { r.r += 2.6; r.alpha *= 0.975; });
-    ripples = ripples.filter(function (r) { return r.alpha > 0.02 && r.r < Math.max(w, h) * 0.9; });
-
-    for (var y = 0; y <= h; y += gap) {
-      for (var x = 0; x <= w; x += gap) {
-        var idle = 0.02 + 0.012 * Math.sin(x * 0.01 + t * 0.5) * Math.sin(y * 0.013 - t * 0.4);
-        var boost = 0;
-        for (var i = 0; i < ripples.length; i++) {
-          var r = ripples[i];
-          var dist = Math.hypot(x - r.x, y - r.y);
-          var diff = dist - r.r;
-          boost += Math.exp(-(diff * diff) / (2 * ringWidth * ringWidth)) * r.alpha * 0.4;
-        }
-        var alpha = Math.min(idle + boost * 0.4, 0.45);
-        if (alpha <= 0.01) continue;
-        var size = 1.0 + boost * 1.8;
-        ctx.fillStyle = 'rgba(' + color + ',' + alpha + ')';
-        ctx.beginPath();
-        ctx.arc(x, y, size, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
-    if (!reduceMotion) requestAnimationFrame(draw);
-  }
-  draw();
+function initBgVideo() {
+  document.querySelectorAll('video').forEach(function (v) {
+    v.muted = true;
+    v.loop = true;
+    var tryPlay = function () { v.play().catch(function () {}); };
+    tryPlay();
+    v.addEventListener('loadeddata', tryPlay);
+  });
 }
 
 /* ---------------------------------------------------------------------
-   2. 影片卡片 — 點縮圖原地播放,播放後可再點「展開」跳出彈窗
+   2. 首頁 WORK 區塊 — 分類 chips + 大預覽 + 縮圖網格
    --------------------------------------------------------------------- */
-var PLACEHOLDER_ID = 'PASTE_YOUTUBE_ID_HERE';
+var HOME_CATEGORY_ORDER = ['全部', '品牌廣告', '產品影片', '生活vlog', 'MV製作'];
 
-function initVideoCards() {
-  var cards = document.querySelectorAll('.video-card');
-  cards.forEach(function (card) {
-    var media = card.querySelector('.video-card__media');
-    if (!media) return;
+function initWorkGrid() {
+  var chipsEl = document.getElementById('work-chips');
+  var previewMediaEl = document.getElementById('work-preview-media');
+  var previewPillEl = document.getElementById('work-preview-pill');
+  var gridEl = document.getElementById('work-grid');
+  if (!chipsEl || !previewMediaEl || !gridEl) return;
 
-    var ytIdInit = card.dataset.yt;
-    if (ytIdInit && ytIdInit !== PLACEHOLDER_ID) {
-      media.style.backgroundImage = 'url(https://i.ytimg.com/vi/' + ytIdInit + '/hqdefault.jpg)';
-      media.classList.add('has-thumb');
-    }
-
-    media.addEventListener('click', function (e) {
-      // 如果點到的是「展開」按鈕,交給 modal 邏輯處理,這裡不重複播放
-      if (e.target.closest('.video-card__expand')) return;
-      var ytId = card.dataset.yt;
-      if (!ytId || ytId === PLACEHOLDER_ID) {
-        alert('這張卡片還沒設定影片 ID,請把 data-yt 換成真正的 YouTube 影片 ID。');
-        return;
-      }
-      if (card.classList.contains('is-playing')) return;
-      playInline(card, media, ytId);
-    });
-  });
-}
-
-function playInline(card, media, ytId) {
-  card.classList.add('is-playing');
-  media.innerHTML = '';
-  media.classList.remove('has-thumb');
-
-  var iframe = document.createElement('iframe');
-  iframe.src = 'https://www.youtube-nocookie.com/embed/' + ytId + '?autoplay=1&mute=1&rel=0';
-  iframe.title = 'video';
-  iframe.allow = 'autoplay; encrypted-media; picture-in-picture';
-  iframe.allowFullscreen = true;
-  media.appendChild(iframe);
-
-  var expandBtn = document.createElement('button');
-  expandBtn.type = 'button';
-  expandBtn.className = 'video-card__expand';
-  expandBtn.setAttribute('aria-label', '在彈出視窗中放大播放');
-  expandBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#F2EFE9" stroke-width="2"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg>';
-  expandBtn.addEventListener('click', function (e) {
-    e.stopPropagation();
-    openVideoModal(ytId, card.dataset.title || '');
-  });
-  media.appendChild(expandBtn);
-}
-
-/* ---------------------------------------------------------------------
-   3. 彈出視窗(modal)播放 — 獨立於卡片原地播放之外的第二種瀏覽方式
-   --------------------------------------------------------------------- */
-var videoModalEl = null;
-
-function initVideoModal() {
-  videoModalEl = document.getElementById('video-modal');
-  if (!videoModalEl) return;
-  videoModalEl.addEventListener('click', function (e) {
-    if (e.target === videoModalEl) closeVideoModal();
-  });
-  var closeBtn = videoModalEl.querySelector('.video-modal__close');
-  if (closeBtn) closeBtn.addEventListener('click', closeVideoModal);
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') closeVideoModal();
-  });
-}
-
-function openVideoModal(ytId, title) {
-  if (!videoModalEl) return;
-  var box = videoModalEl.querySelector('.video-modal__box');
-  box.innerHTML = '<button type="button" class="video-modal__close" aria-label="關閉">&times;</button>' +
-    '<iframe src="https://www.youtube-nocookie.com/embed/' + ytId + '?autoplay=1&mute=1&rel=0" title="' +
-    (title || 'video') + '" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
-  box.querySelector('.video-modal__close').addEventListener('click', closeVideoModal);
-  videoModalEl.classList.remove('hidden');
-  document.body.style.overflow = 'hidden';
-}
-
-function closeVideoModal() {
-  if (!videoModalEl || videoModalEl.classList.contains('hidden')) return;
-  videoModalEl.classList.add('hidden');
-  videoModalEl.querySelector('.video-modal__box').innerHTML = '';
-  document.body.style.overflow = '';
-}
-
-/* ---------------------------------------------------------------------
-   4. 篩選 chips(AllWorks 頁)
-   --------------------------------------------------------------------- */
-function initFilterChips() {
-  var chips = document.querySelectorAll('.filter-chip');
-  if (!chips.length) return;
-  var cards = document.querySelectorAll('[data-cat]');
-
-  chips.forEach(function (chip) {
-    chip.addEventListener('click', function () {
-      chips.forEach(function (c) { c.classList.remove('is-active'); });
-      chip.classList.add('is-active');
-      var target = chip.dataset.filter;
-      cards.forEach(function (card) {
-        var show = target === '全部' || card.dataset.cat === target;
-        card.classList.toggle('hidden', !show);
+  fetch('content/works.json')
+    .then(function (res) {
+      if (!res.ok) throw new Error('works.json 讀取失敗：' + res.status);
+      return res.json();
+    })
+    .then(function (data) {
+      var items = (data.items || []).map(function (item, idx) {
+        var ytId = extractYouTubeId(item.yt);
+        return {
+          id: ytId || ('work-' + idx),
+          title: item.title || '',
+          cat: item.cat || '未分類',
+          yt: ytId,
+          desc: item.desc || '',
+          dur: item.dur || '',
+          ratio: item.ratio || '9:16',
+        };
       });
+
+      var cats = HOME_CATEGORY_ORDER.filter(function (c) {
+        return c === '全部' || items.some(function (w) { return w.cat === c; });
+      });
+      items.forEach(function (w) {
+        if (cats.indexOf(w.cat) === -1) cats.push(w.cat);
+      });
+
+      var state = { filter: '全部', selectedId: items.length ? items[0].id : null, isPlaying: false };
+
+      function visibleWorks() {
+        return state.filter === '全部' ? items : items.filter(function (w) { return w.cat === state.filter; });
+      }
+
+      function selectedWork() {
+        var visible = visibleWorks();
+        var found = visible.filter(function (w) { return w.id === state.selectedId; })[0];
+        return found || visible[0] || null;
+      }
+
+      function renderChips() {
+        chipsEl.innerHTML = cats.map(function (c) {
+          var active = c === state.filter;
+          return '<button type="button" class="chip' + (active ? ' is-active' : '') +
+            '" data-cat="' + escapeHtml(c) + '">' + escapeHtml(c) + '</button>';
+        }).join('');
+        chipsEl.querySelectorAll('.chip').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            state.filter = btn.dataset.cat;
+            state.isPlaying = false;
+            var stillVisible = visibleWorks().some(function (w) { return w.id === state.selectedId; });
+            if (!stillVisible) {
+              var first = visibleWorks()[0];
+              state.selectedId = first ? first.id : null;
+            }
+            renderAll();
+          });
+        });
+      }
+
+      function renderPreview() {
+        var work = selectedWork();
+        if (!work) {
+          previewMediaEl.innerHTML = '';
+          previewPillEl.innerHTML = '';
+          return;
+        }
+        if (state.isPlaying && work.yt) {
+          previewMediaEl.style.backgroundImage = '';
+          previewMediaEl.innerHTML = youtubeEmbed(work.yt);
+        } else {
+          previewMediaEl.innerHTML = '<div class="work-preview__play"><span>▶</span></div>';
+          previewMediaEl.style.backgroundImage = work.yt ? 'url(' + youtubeThumb(work.yt) + ')' : 'none';
+        }
+        previewPillEl.innerHTML =
+          '<span class="work-preview__pill-dot"></span><span>' +
+          escapeHtml(work.cat) + (work.dur ? ' · ' + escapeHtml(work.dur) : '') + ' · ' + escapeHtml(work.ratio) + '</span>';
+      }
+
+      function renderGrid() {
+        var visible = visibleWorks();
+        gridEl.innerHTML = visible.map(function (w) {
+          var selected = w.id === state.selectedId;
+          return (
+            '<div class="work-grid__item' + (selected ? ' is-selected' : '') + '" data-id="' + escapeHtml(w.id) + '">' +
+              '<div class="work-grid__thumb" style="' + (w.yt ? 'background-image:url(' + youtubeThumb(w.yt) + ')' : '') + '"></div>' +
+              '<div class="work-grid__info"><div class="work-grid__title">' + escapeHtml(w.title) + '</div></div>' +
+            '</div>'
+          );
+        }).join('');
+        gridEl.querySelectorAll('.work-grid__item').forEach(function (el) {
+          el.addEventListener('click', function () {
+            state.selectedId = el.dataset.id;
+            state.isPlaying = false;
+            renderAll();
+          });
+        });
+      }
+
+      function renderAll() {
+        renderChips();
+        renderPreview();
+        renderGrid();
+      }
+
+      previewMediaEl.addEventListener('click', function () {
+        if (state.isPlaying) return;
+        state.isPlaying = true;
+        renderPreview();
+      });
+
+      renderAll();
+    })
+    .catch(function (err) {
+      console.error('作品資料載入失敗', err);
+      gridEl.innerHTML = '<p class="mono" style="color:var(--muted-60);">作品資料載入失敗，請稍後再試。</p>';
     });
-  });
 }
 
 /* ---------------------------------------------------------------------
-   5. 合作洽談表單 — Formspree 串接(表單 ID: xzdnrrrj)
+   3. BTS 頁 — 方形卡片網格,點擊原地播放
+   --------------------------------------------------------------------- */
+function initBtsGrid() {
+  var gridEl = document.getElementById('bts-grid');
+  var countEl = document.getElementById('bts-count');
+  if (!gridEl) return;
+
+  fetch('content/bts.json')
+    .then(function (res) {
+      if (!res.ok) throw new Error('bts.json 讀取失敗：' + res.status);
+      return res.json();
+    })
+    .then(function (data) {
+      var items = data.items || [];
+      gridEl.innerHTML = items.map(function (item, idx) {
+        var num = String(idx + 1).length < 2 ? '0' + (idx + 1) : String(idx + 1);
+        var ytId = extractYouTubeId(item.yt);
+        var color = idx % 2 === 0 ? 'var(--orange)' : 'var(--teal)';
+        return (
+          '<div class="bts-grid__item" data-yt="' + escapeHtml(ytId || '') + '">' +
+            '<div class="bts-grid__thumb" style="' + (ytId ? 'background-image:url(' + youtubeThumb(ytId) + ')' : '') + '">' +
+              '<div class="work-preview__play"><span>▶</span></div>' +
+            '</div>' +
+            '<div class="bts-grid__meta"><span class="bts-grid__num" style="color:' + color + ';">' + num + '</span>' +
+            '<span class="bts-grid__tag">' + escapeHtml(item.tag || '') + '</span></div>' +
+            '<div class="bts-grid__title">' + escapeHtml(item.title || ('幕後花絮 ' + num)) + '</div>' +
+          '</div>'
+        );
+      }).join('');
+
+      if (countEl) countEl.textContent = items.length + ' FRAMES';
+
+      gridEl.querySelectorAll('.bts-grid__item').forEach(function (card) {
+        card.addEventListener('click', function () {
+          var ytId = card.dataset.yt;
+          if (!ytId) return;
+          var thumb = card.querySelector('.bts-grid__thumb');
+          if (thumb.querySelector('iframe')) return;
+          thumb.style.backgroundImage = '';
+          thumb.innerHTML = youtubeEmbed(ytId);
+        });
+      });
+    })
+    .catch(function (err) {
+      console.error('花絮資料載入失敗', err);
+      gridEl.innerHTML = '<p class="mono" style="color:var(--muted-60);">花絮資料載入失敗，請稍後再試。</p>';
+    });
+}
+
+/* ---------------------------------------------------------------------
+   4. 合作洽談表單 — Formspree 串接(表單 ID: xzdnrrrj)
    --------------------------------------------------------------------- */
 function initContactForm() {
   var form = document.getElementById('contact-form');
