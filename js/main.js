@@ -47,6 +47,10 @@ function initBgVideo() {
     var tryPlay = function () { v.play().catch(function () {}); };
     tryPlay();
     v.addEventListener('loadeddata', tryPlay);
+    v.addEventListener('loadeddata', function () {
+      var placeholder = v.parentElement && v.parentElement.querySelector('.hero-reel__placeholder');
+      if (placeholder) placeholder.classList.add('hidden');
+    });
   });
 }
 
