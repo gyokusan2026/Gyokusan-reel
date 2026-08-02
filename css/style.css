@@ -512,4 +512,12 @@ input::placeholder, textarea::placeholder { color: var(--muted-55); }
   .hero p, .hero--index p { max-width: 100%; }
   .site-nav__role { display: none; }
   .quicklinks { gap: 20px; }
+
+  .site-nav { gap: 10px 16px; }
+  .site-nav__links { flex-basis: 100%; display: flex; gap: 14px; }
+  .site-nav__links a:first-child { margin-left: 0; }
+
+  .hero-reel { aspect-ratio: 4 / 5; }
+  .hero-reel__now-playing { display: none; }
+  .hero-reel__caption { font-size: 14px; line-height: 1.7; }
 }
