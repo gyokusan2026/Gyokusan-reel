@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', function () {
   initWorkGrid();
   initBtsGrid();
   initContactForm();
+  initVideoModal();
 });
 
 /* ---------------------------------------------------------------------
@@ -34,7 +35,7 @@ function youtubeThumb(ytId) {
 
 function youtubeEmbed(ytId) {
   return '<iframe src="https://www.youtube-nocookie.com/embed/' + ytId +
-    '?autoplay=1&mute=1&rel=0" title="video" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
+    '?autoplay=1&rel=0" title="video" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
 }
 
 /* ---------------------------------------------------------------------
@@ -217,13 +218,26 @@ function initBtsGrid() {
       if (countEl) countEl.textContent = items.length + ' FRAMES';
 
       gridEl.querySelectorAll('.bts-grid__item').forEach(function (card) {
-        card.addEventListener('click', function () {
+        card.addEventListener('click', function (e) {
+          if (e.target.closest('.bts-grid__expand')) return;
           var ytId = card.dataset.yt;
           if (!ytId) return;
           var thumb = card.querySelector('.bts-grid__thumb');
           if (thumb.querySelector('iframe')) return;
           thumb.style.backgroundImage = '';
           thumb.innerHTML = youtubeEmbed(ytId);
+
+          var expandBtn = document.createElement('button');
+          expandBtn.type = 'button';
+          expandBtn.className = 'bts-grid__expand';
+          expandBtn.setAttribute('aria-label', '在彈出視窗中放大播放');
+          expandBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#F2EFE9" stroke-width="2"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg>';
+          expandBtn.addEventListener('click', function (ev) {
+            ev.stopPropagation();
+            var title = card.querySelector('.bts-grid__title');
+            openVideoModal(ytId, title ? title.textContent : '');
+          });
+          thumb.appendChild(expandBtn);
         });
       });
     })
@@ -234,7 +248,41 @@ function initBtsGrid() {
 }
 
 /* ---------------------------------------------------------------------
-   4. 合作洽談表單 — Formspree 串接(表單 ID: xzdnrrrj)
+   4. 影片彈窗放大播放（BTS 用）
+   --------------------------------------------------------------------- */
+var videoModalEl = null;
+
+function initVideoModal() {
+  videoModalEl = document.getElementById('video-modal');
+  if (!videoModalEl) return;
+  videoModalEl.addEventListener('click', function (e) {
+    if (e.target === videoModalEl) closeVideoModal();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeVideoModal();
+  });
+}
+
+function openVideoModal(ytId, title) {
+  if (!videoModalEl) return;
+  var box = videoModalEl.querySelector('.video-modal__box');
+  box.innerHTML = '<button type="button" class="video-modal__close" aria-label="關閉">&times;</button>' +
+    '<iframe src="https://www.youtube-nocookie.com/embed/' + ytId + '?autoplay=1&rel=0" title="' +
+    escapeHtml(title || 'video') + '" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
+  box.querySelector('.video-modal__close').addEventListener('click', closeVideoModal);
+  videoModalEl.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeVideoModal() {
+  if (!videoModalEl || videoModalEl.classList.contains('hidden')) return;
+  videoModalEl.classList.add('hidden');
+  videoModalEl.querySelector('.video-modal__box').innerHTML = '';
+  document.body.style.overflow = '';
+}
+
+/* ---------------------------------------------------------------------
+   5. 合作洽談表單 — Formspree 串接(表單 ID: xzdnrrrj)
    --------------------------------------------------------------------- */
 function initContactForm() {
   var form = document.getElementById('contact-form');
