@@ -236,6 +236,8 @@ function initBtsGrid() {
             ev.stopPropagation();
             var title = card.querySelector('.bts-grid__title');
             openVideoModal(ytId, title ? title.textContent : '');
+            thumb.innerHTML = '<div class="work-preview__play"><span>▶</span></div>';
+            thumb.style.backgroundImage = 'url(' + youtubeThumb(ytId) + ')';
           });
           thumb.appendChild(expandBtn);
         });
